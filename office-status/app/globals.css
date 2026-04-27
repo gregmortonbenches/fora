@@ -1,15 +1,14 @@
+/* Japandi palette: warm paper, ink, restrained accents. No gradients. */
 :root {
-  --sky-top: #cfe4f5;
-  --sky-mid: #e6dfd1;
-  --grass: #6f8f4a;
-  --grass-shadow: #4f6c33;
-  --soil: #6b4f33;
-  --pole: #d8d2c4;
-  --pole-shadow: #8c8676;
-  --gold: #d8b14a;
-  --ink: #2a2118;
-  --muted: #6b5e4c;
-  --danger: #a32a1f;
+  --paper: #f1ebe0;
+  --paper-deep: #e7dfd1;
+  --ink: #2a2520;
+  --ink-soft: #4a4239;
+  --muted: #8a7f70;
+  --line: #c9bfaf;
+  --pole: #2a2520;
+  --plinth: #5a4a3a;
+  --danger: #8a3a30;
 }
 
 * {
@@ -21,42 +20,58 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100%;
+  background: var(--paper);
   color: var(--ink);
-  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
-    "Times New Roman", serif;
-  background:
-    linear-gradient(
-      180deg,
-      var(--sky-top) 0%,
-      var(--sky-mid) 55%,
-      var(--grass) 70%,
-      var(--grass-shadow) 100%
-    )
-    no-repeat;
-  background-attachment: fixed;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter",
+    "Helvetica Neue", Arial, sans-serif;
+  font-weight: 300;
+  letter-spacing: 0.005em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 main {
   max-width: 760px;
   margin: 0 auto;
-  padding: 56px 20px 64px;
+  padding: 72px 24px 80px;
   text-align: center;
 }
 
+/* Small, all-caps tracker — quiet and intentional. */
 h1 {
-  font-size: 32px;
-  margin: 0 0 40px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  color: var(--ink);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0 0 72px;
 }
 
 .lawn {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  gap: clamp(24px, 8vw, 80px);
-  margin: 0 auto 32px;
+  gap: clamp(40px, 12vw, 120px);
+  margin: 0 auto 24px;
+}
+
+/* A single, thin horizon line behind the flagpoles' bases. */
+.lawn::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  width: min(520px, 92%);
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    var(--line) 15%,
+    var(--line) 85%,
+    transparent 100%
+  );
 }
 
 .flagpole-wrap {
@@ -66,10 +81,9 @@ h1 {
   flex: 0 0 auto;
 }
 
-/* The clickable flagpole "scene". */
 .flagpole {
   position: relative;
-  width: 140px;
+  width: 120px;
   height: 360px;
   background: transparent;
   border: 0;
@@ -83,81 +97,61 @@ h1 {
 }
 
 .flagpole:focus-visible {
-  outline: 2px solid var(--gold);
-  outline-offset: 4px;
-  border-radius: 4px;
-}
-
-/* Vertical pole */
-.pole {
-  position: absolute;
-  left: 50%;
-  top: 6px;
-  bottom: 22px;
-  width: 5px;
-  transform: translateX(-50%);
-  background: linear-gradient(
-    to right,
-    var(--pole-shadow),
-    var(--pole) 45%,
-    #fff 55%,
-    var(--pole) 70%,
-    var(--pole-shadow)
-  );
+  outline: 1px solid var(--ink-soft);
+  outline-offset: 6px;
   border-radius: 2px;
 }
 
-/* Gold ball at the top */
+/* Pole: a single ink line, no metallic gradient. */
+.pole {
+  position: absolute;
+  left: 50%;
+  top: 4px;
+  bottom: 14px;
+  width: 2px;
+  transform: translateX(-50%);
+  background: var(--pole);
+}
+
+/* Finial: tiny matte ink dot — no glow. */
 .finial {
   position: absolute;
   left: 50%;
   top: -2px;
-  width: 16px;
-  height: 16px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   transform: translateX(-50%);
-  background:
-    radial-gradient(circle at 32% 30%, #fff5cc 0%, var(--gold) 55%, #8a6d20 100%);
-  box-shadow:
-    0 0 8px rgba(216, 177, 74, 0.55),
-    inset -1px -1px 2px rgba(0, 0, 0, 0.25);
+  background: var(--pole);
 }
 
-/* Soil mound at the bottom */
+/* Base: a small dark plinth, square-edged. */
 .base {
   position: absolute;
   left: 50%;
   bottom: 8px;
-  width: 64px;
-  height: 18px;
+  width: 22px;
+  height: 5px;
   transform: translateX(-50%);
-  background: radial-gradient(
-    ellipse at 50% 0%,
-    var(--soil) 0%,
-    var(--grass-shadow) 70%,
-    transparent 100%
-  );
-  border-radius: 50%;
-  filter: blur(0.4px);
+  background: var(--plinth);
+  border-radius: 1px;
 }
 
 /* The flag itself. Anchored to the pole, slides up/down via `top`. */
 .flag {
   position: absolute;
-  left: calc(50% + 2px);
+  left: calc(50% + 1px);
   width: 88px;
   height: 56px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-radius: 1px 4px 4px 1px;
-  box-shadow:
-    1px 2px 4px rgba(0, 0, 0, 0.18),
-    inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+  /* Soft, low shadow rather than a hard drop. */
+  box-shadow: 1px 1px 2px rgba(42, 37, 32, 0.12);
   transform-origin: left center;
   transition: top 0.9s cubic-bezier(0.4, 0, 0.2, 1);
-  /* Lowered position: just above the soil. */
-  top: 270px;
+  /* Lowered position: just above the plinth. */
+  top: 280px;
 }
 
 .flag .stripe {
@@ -167,28 +161,27 @@ h1 {
 
 /* Raised position: just under the finial. Animated flutter while raised. */
 .flag.raised {
-  top: 14px;
-  animation: flutter 3.6s ease-in-out infinite;
+  top: 8px;
+  animation: flutter 4s ease-in-out infinite;
 }
 
 .flag.updating {
   opacity: 0.85;
 }
 
-/* Subtle, non-cheesy flutter while raised. */
 @keyframes flutter {
   0%,
   100% {
     transform: skewY(0deg) skewX(0deg);
   }
   25% {
-    transform: skewY(-1.2deg) skewX(0.6deg);
+    transform: skewY(-1deg) skewX(0.5deg);
   }
   50% {
-    transform: skewY(0.6deg) skewX(-0.4deg);
+    transform: skewY(0.5deg) skewX(-0.3deg);
   }
   75% {
-    transform: skewY(-0.6deg) skewX(0.3deg);
+    transform: skewY(-0.5deg) skewX(0.25deg);
   }
 }
 
@@ -202,52 +195,51 @@ h1 {
 }
 
 .flagpole-wrap h2 {
-  margin: 18px 0 4px;
-  font-size: 22px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
+  margin: 28px 0 6px;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--ink);
 }
 
 .status {
   margin: 0;
-  font-size: 15px;
+  font-size: 14px;
   color: var(--ink);
+  font-weight: 400;
 }
 
 .timestamp {
-  margin: 4px 0 0;
-  font-size: 13px;
+  margin: 6px 0 0;
+  font-size: 12px;
   color: var(--muted);
-  font-style: italic;
+  letter-spacing: 0.02em;
 }
 
 .error {
   color: var(--danger);
-  margin: 16px auto 0;
-  font-size: 14px;
-}
-
-.footer-note {
-  margin-top: 32px;
-  color: var(--muted);
+  margin: 24px auto 0;
   font-size: 13px;
-  font-style: italic;
+  letter-spacing: 0.02em;
 }
 
 @media (max-width: 520px) {
+  main {
+    padding: 56px 20px 64px;
+  }
+  h1 {
+    margin-bottom: 56px;
+  }
   .flagpole {
-    width: 120px;
+    width: 110px;
     height: 320px;
   }
   .flag {
-    width: 76px;
+    width: 78px;
     height: 50px;
-    top: 240px;
+    top: 248px;
   }
   .flag.raised {
-    top: 14px;
-  }
-  h1 {
-    font-size: 26px;
+    top: 8px;
   }
 }

@@ -149,11 +149,6 @@ export default function Page() {
       </div>
 
       {error && <p className="error">{error}</p>}
-
-      <p className="footer-note">
-        Click a flag to raise or lower it. Auto-refreshes every{" "}
-        {POLL_INTERVAL_MS / 1000} seconds.
-      </p>
     </main>
   );
 }
