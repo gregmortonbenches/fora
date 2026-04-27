@@ -104,44 +104,45 @@ export default function Page() {
 
   return (
     <main>
-      <h1>Who's at {OFFICE_NAME}?</h1>
-      <p className="subtitle">Tap a button to log when you're in.</p>
+      <h1>Who&rsquo;s at {OFFICE_NAME}?</h1>
 
-      <div className="cards">
+      <div className="lawn">
         {PEOPLE.map((person) => {
           const status = statuses[person.id] ?? null;
           const inOffice = !!status?.inOffice;
           const isUpdating = updating === person.id;
+          const [c1, c2, c3] = person.flagColors;
           return (
-            <div key={person.id} className="card">
-              <div className="card-info">
-                <h2>{person.name}</h2>
-                <div className="status-line">
-                  <span className={`dot${inOffice ? " in" : ""}`} />
-                  <span>
-                    {inOffice ? `In ${OFFICE_NAME}` : `Not in ${OFFICE_NAME}`}
-                  </span>
-                </div>
-                {status?.updatedAt ? (
-                  <p className="timestamp">
-                    {inOffice ? "Arrived" : "Left"} {timeAgo(status.updatedAt)}
-                  </p>
-                ) : (
-                  <p className="timestamp">No status yet</p>
-                )}
-              </div>
+            <div key={person.id} className="flagpole-wrap">
               <button
                 type="button"
-                className={`toggle${inOffice ? " in" : ""}`}
+                className="flagpole"
                 onClick={() => toggle(person.id, inOffice)}
                 disabled={isUpdating}
+                aria-label={`${inOffice ? "Lower" : "Raise"} ${person.name}'s flag`}
+                aria-pressed={inOffice}
               >
-                {isUpdating
-                  ? "Saving..."
-                  : inOffice
-                    ? "I'm leaving"
-                    : "I'm in"}
+                <span className="finial" aria-hidden="true" />
+                <span className="pole" aria-hidden="true" />
+                <span className="base" aria-hidden="true" />
+                <span
+                  className={`flag${inOffice ? " raised" : ""}${isUpdating ? " updating" : ""}`}
+                  aria-hidden="true"
+                >
+                  <span className="stripe" style={{ background: c1 }} />
+                  <span className="stripe" style={{ background: c2 }} />
+                  <span className="stripe" style={{ background: c3 }} />
+                </span>
               </button>
+              <h2>{person.name}</h2>
+              <p className="status">
+                {inOffice ? `In ${OFFICE_NAME}` : `Not in ${OFFICE_NAME}`}
+              </p>
+              <p className="timestamp">
+                {status?.updatedAt
+                  ? `${inOffice ? "Arrived" : "Left"} ${timeAgo(status.updatedAt)}`
+                  : "No status yet"}
+              </p>
             </div>
           );
         })}
@@ -150,7 +151,8 @@ export default function Page() {
       {error && <p className="error">{error}</p>}
 
       <p className="footer-note">
-        Auto-refreshes every {POLL_INTERVAL_MS / 1000} seconds.
+        Click a flag to raise or lower it. Auto-refreshes every{" "}
+        {POLL_INTERVAL_MS / 1000} seconds.
       </p>
     </main>
   );
