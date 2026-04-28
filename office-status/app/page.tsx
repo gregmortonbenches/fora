@@ -22,7 +22,6 @@ function timeAgo(ts: number): string {
 
 export default function Page() {
   const [statuses, setStatuses] = useState<StatusMap>({});
-  const [updating, setUpdating] = useState<PersonId | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [, forceTick] = useState(0);
 
@@ -52,8 +51,18 @@ export default function Page() {
 
   const toggle = useCallback(
     async (id: PersonId, currentlyIn: boolean) => {
-      setUpdating(id);
       setError(null);
+
+      // Optimistic update: move the flag immediately so the click feels instant.
+      let prevStatus: Status | null = null;
+      setStatuses((prev) => {
+        prevStatus = prev[id] ?? null;
+        return {
+          ...prev,
+          [id]: { inOffice: !currentlyIn, updatedAt: Date.now() },
+        };
+      });
+
       try {
         let secret =
           typeof window !== "undefined"
@@ -77,7 +86,8 @@ export default function Page() {
             secret,
           );
           if (!entered) {
-            setUpdating(null);
+            // User cancelled — roll back the optimistic change.
+            setStatuses((prev) => ({ ...prev, [id]: prevStatus }));
             return;
           }
           window.localStorage.setItem(SECRET_STORAGE_KEY, entered);
@@ -91,26 +101,30 @@ export default function Page() {
           }
           throw new Error(`HTTP ${res.status}`);
         }
+        // Reconcile with the authoritative server timestamp.
         const updated = (await res.json()) as Status;
         setStatuses((prev) => ({ ...prev, [id]: updated }));
       } catch (err) {
+        // Roll back the optimistic change on failure.
+        setStatuses((prev) => ({ ...prev, [id]: prevStatus }));
         setError(err instanceof Error ? err.message : "Failed to update");
-      } finally {
-        setUpdating(null);
       }
     },
     [],
   );
 
+  const allOut = PEOPLE.every((p) => !statuses[p.id]?.inOffice);
+
   return (
     <main>
-      <h1>Who&rsquo;s at {OFFICE_NAME}?</h1>
+      <h1>
+        {allOut ? `${OFFICE_NAME} is empty` : `Who\u2019s at ${OFFICE_NAME}?`}
+      </h1>
 
       <div className="lawn">
         {PEOPLE.map((person) => {
           const status = statuses[person.id] ?? null;
           const inOffice = !!status?.inOffice;
-          const isUpdating = updating === person.id;
           const [c1, c2, c3] = person.flagColors;
           return (
             <div key={person.id} className="flagpole-wrap">
@@ -118,21 +132,41 @@ export default function Page() {
                 type="button"
                 className="flagpole"
                 onClick={() => toggle(person.id, inOffice)}
-                disabled={isUpdating}
                 aria-label={`${inOffice ? "Lower" : "Raise"} ${person.name}'s flag`}
                 aria-pressed={inOffice}
               >
                 <span className="finial" aria-hidden="true" />
                 <span className="pole" aria-hidden="true" />
                 <span className="base" aria-hidden="true" />
-                <span
-                  className={`flag${inOffice ? " raised" : ""}${isUpdating ? " updating" : ""}`}
+                <svg
+                  className={`flag${inOffice ? " raised" : ""}`}
+                  viewBox="0 0 88 56"
+                  preserveAspectRatio="none"
                   aria-hidden="true"
                 >
-                  <span className="stripe" style={{ background: c1 }} />
-                  <span className="stripe" style={{ background: c2 }} />
-                  <span className="stripe" style={{ background: c3 }} />
-                </span>
+                  <defs>
+                    <clipPath
+                      id={`wave-${person.id}`}
+                      clipPathUnits="userSpaceOnUse"
+                    >
+                      <path d="M 0 0 L 84 0 Q 92 14 88 28 Q 84 42 86 56 L 0 56 Z">
+                        {inOffice && (
+                          <animate
+                            attributeName="d"
+                            dur="4s"
+                            repeatCount="indefinite"
+                            values="M 0 0 L 84 0 Q 92 14 88 28 Q 84 42 86 56 L 0 56 Z;M 0 0 L 88 0 Q 80 14 90 28 Q 92 42 84 56 L 0 56 Z;M 0 0 L 84 0 Q 92 14 88 28 Q 84 42 86 56 L 0 56 Z"
+                          />
+                        )}
+                      </path>
+                    </clipPath>
+                  </defs>
+                  <g clipPath={`url(#wave-${person.id})`}>
+                    <rect x="0" y="0" width="88" height="19" fill={c1} />
+                    <rect x="0" y="19" width="88" height="18" fill={c2} />
+                    <rect x="0" y="37" width="88" height="19" fill={c3} />
+                  </g>
+                </svg>
               </button>
               <h2>{person.name}</h2>
               <p className="status">

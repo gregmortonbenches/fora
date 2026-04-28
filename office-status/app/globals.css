@@ -20,7 +20,6 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100%;
-  background: var(--paper);
   color: var(--ink);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter",
     "Helvetica Neue", Arial, sans-serif;
@@ -28,6 +27,14 @@ body {
   letter-spacing: 0.005em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Warm paper background with a soft, tinted SVG-noise grain. */
+body {
+  background-color: var(--paper);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.16 0 0 0 0 0.14 0 0 0 0 0.12 0 0 0 0.07 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-repeat: repeat;
+  background-attachment: fixed;
 }
 
 main {
@@ -137,60 +144,29 @@ h1 {
   border-radius: 1px;
 }
 
-/* The flag itself. Anchored to the pole, slides up/down via `top`. */
+/* The flag is an inline SVG. Anchored to the pole, slides up/down via `top`.
+   The flutter is handled inside the SVG (SMIL on the clip path). */
 .flag {
   position: absolute;
   left: calc(50% + 1px);
   width: 88px;
   height: 56px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
   /* Soft, low shadow rather than a hard drop. */
-  box-shadow: 1px 1px 2px rgba(42, 37, 32, 0.12);
-  transform-origin: left center;
+  filter: drop-shadow(1px 1px 1.5px rgba(42, 37, 32, 0.18));
   transition: top 0.9s cubic-bezier(0.4, 0, 0.2, 1);
   /* Lowered position: just above the plinth. */
   top: 280px;
+  overflow: visible;
 }
 
-.flag .stripe {
-  flex: 1;
-  width: 100%;
-}
-
-/* Raised position: just under the finial. Animated flutter while raised. */
+/* Raised position: just under the finial. */
 .flag.raised {
   top: 8px;
-  animation: flutter 4s ease-in-out infinite;
-}
-
-.flag.updating {
-  opacity: 0.85;
-}
-
-@keyframes flutter {
-  0%,
-  100% {
-    transform: skewY(0deg) skewX(0deg);
-  }
-  25% {
-    transform: skewY(-1deg) skewX(0.5deg);
-  }
-  50% {
-    transform: skewY(0.5deg) skewX(-0.3deg);
-  }
-  75% {
-    transform: skewY(-0.5deg) skewX(0.25deg);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .flag {
     transition: none;
-  }
-  .flag.raised {
-    animation: none;
   }
 }
 
